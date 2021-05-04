@@ -55,8 +55,8 @@ function setup() {
     gui2.addGlobals('playSong', 'lips', 'amplitudeBars', 'radialBars');
 
     // // MIC INPUT
-    mic = new p5.AudioIn();
-    mic.start();
+    // mic = new p5.AudioIn();
+    // mic.start();
 
     song.setVolume(0.01);
     song.playMode('untilDone');
@@ -128,13 +128,11 @@ function draw() {
     // fill(255, 10);
     // circle(mouseX, mouseY, 50);
 
-    var vol;
-
-    // MIC ELLIPSE
-    if(lips) {
-        vol = mic.getLevel();
-        ellipse(900,400, 200, vol*800);
-    }
+    // // MIC ELLIPSE
+    // if(lips) {
+    //     vol = mic.getLevel();
+    //     ellipse(900,400, 200, vol*800);
+    // }
 
     // AUDIO 
     // vol = amp.getLevel();
@@ -152,8 +150,8 @@ function draw() {
     // line(volhistory.length, 0, volhistory.length, height);
 
     if(amplitudeBars) {
-        vol = amp.getLevel();
-        volhistory.push(vol);
+        var vol = amp.getLevel();
+        volhistory.push(vol * 50);
         console.log(vol);
         stroke(255);
         noFill();
@@ -164,6 +162,10 @@ function draw() {
             vertex(i, y);
         }
         endShape();
+
+        if(volhistory.length > width) {
+            volhistory.splice(0,1);
+        }
     }
 
 }

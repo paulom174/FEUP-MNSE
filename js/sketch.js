@@ -16,7 +16,7 @@ var drawStroke = true;
 var drawFill = true;
 var radius = 20;
 var shape = ['circle', 'triangle', 'square', 'pentagon', 'star'];
-var label = 'label';
+//var label = 'label';
 
 // gui2 params
 var lips = false;
@@ -54,8 +54,8 @@ function setup() {
 
     // Create Layout GUI
     gui = createGui('Background');
-    gui.addGlobals('numShapes', 'bigRadius', 'shape', 'label', 'radius',
-        'drawFill', 'fillColor', 'drawStroke', 'backgroundColor', 'strokeColor', 'strokeWidth');
+    gui.addGlobals('numShapes', 'bigRadius', 'shape', 'radius',
+        'drawFill', 'fillColor', 'drawStroke', 'strokeColor', 'strokeWidth', 'backgroundColor');
 
     gui2 = createGui('Main display').setPosition(230, 20);
     gui2.addGlobals('playSong', 'lips', 'amplitude', 'FFTBars', 'radialBars');
@@ -161,7 +161,7 @@ function draw() {
         amplitudeDisplay();
     }
 
-    if(FFTBars) {
+    else if(FFTBars) {
         fftLinearDisplay();
     }
 
@@ -215,22 +215,22 @@ function star(n, x, y, d1, d2) {
 }
 
 function amplitudeDisplay() {
-    // var vol = amp.getLevel();
-    // volhistory.push(vol * 50);
-    // stroke(255);
-    // strokeWeight(1);
-    // noFill();
-    // beginShape();
+    var vol = amp.getLevel();
+    volhistory.push(vol * 50);
+    stroke(255);
+    strokeWeight(1);
+    noFill();
+    beginShape();
     
-    // for(var i=0; i < volhistory.length; i++) {
-    //     var y = map(volhistory[i], 0, 1, height, 0);
-    //     vertex(i, y - windowHeight/2 + 25);
-    // }
-    // endShape();
+    for(var i=0; i < volhistory.length; i++) {
+        var y = map(volhistory[i], 0, 1, height, 0);
+        vertex(i, y - windowHeight/2 + 25);
+    }
+    endShape();
 
-    // if(volhistory.length > width) {
-    //     volhistory.splice(0,1);
-    // }
+    if(volhistory.length > width) {
+        volhistory.splice(0,1);
+    }
 }
 
 function fftLinearDisplay() {
@@ -242,24 +242,20 @@ function fftLinearDisplay() {
         var y = map(amp2, 0, 256, height, 0);
         fill(i, 255, 255);
         rect(width / 2 + i * w, y, w - 2, height - y);
-
-        // // RADIAL
-        // var r = map(amp2, 0, 256, 40, 200);
-        // var x = r * cos
+        rect(width / 2 - i * w, y, w - 2, height - y);
     }
-    // endShape();
 }
 
 function fftRadialDisplay() {
     var spectrum2 = fft2.analyze();
     noStroke();
     noFill();
-
+    beginShape();
     translate(width/2, height/2);
     for(var i=0; i < spectrum2.length; i++) {
         var amp2 = spectrum2[i];
         var angle = map(i, 0, spectrum2.length, 0, 360);
-        var r = map(amp2, 0, 256, 20, 100);
+        var r = map(amp2, 0, 256, 40, 200);
         var x = r * cos(angle);
         var y = r * sin(angle);
 

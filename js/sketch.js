@@ -1,6 +1,10 @@
 // var mic;
 var song;
 var volhistory = [];
+var amp;
+var fft;
+var fft2;
+var w;
 
 // gui params
 var numShapes = 20;
@@ -17,7 +21,8 @@ var label = 'label';
 // gui2 params
 var lips = false;
 var playSong = false;
-var amplitudeBars = false;
+var amplitude = false;
+var FFTBars = false;
 var radialBars = false;
 
 // gui
@@ -30,8 +35,8 @@ function preload() {
 
 function toggleSong() {
     if(playSong) {
-
         song.play();
+        amplitudeDisplay();
     }
     else {
         song.pause();
@@ -41,6 +46,7 @@ function toggleSong() {
 function setup() {
 
     createCanvas(windowWidth, windowHeight);
+    colorMode(HSB);
     getAudioContext().resume();
 
     // Calculate big radius
@@ -52,7 +58,7 @@ function setup() {
         'drawFill', 'fillColor', 'drawStroke', 'backgroundColor', 'strokeColor', 'strokeWidth');
 
     gui2 = createGui('Main display').setPosition(230, 20);
-    gui2.addGlobals('playSong', 'lips', 'amplitudeBars', 'radialBars');
+    gui2.addGlobals('playSong', 'lips', 'amplitude', 'FFTBars', 'radialBars');
 
     // // MIC INPUT
     // mic = new p5.AudioIn();
@@ -62,8 +68,10 @@ function setup() {
     song.playMode('untilDone');
     // song.play();
     amp = new p5.Amplitude();
+    fft = new p5.FFT(0.9, 64);
+    fft2 = new p5.FFT(0.9, 64);
 
-
+    w = width / 64;
 
     // noLoop();
 }
@@ -149,23 +157,16 @@ function draw() {
     // stroke(255, 0, 0);
     // line(volhistory.length, 0, volhistory.length, height);
 
-    if(amplitudeBars) {
-        var vol = amp.getLevel();
-        volhistory.push(vol * 50);
-        console.log(vol);
-        stroke(255);
-        noFill();
-        beginShape();
-        
-        for(var i=0; i < volhistory.length; i++) {
-            var y = map(volhistory[i], 0, 1, height, 0);
-            vertex(i, y);
-        }
-        endShape();
+    if(amplitude) {
+        amplitudeDisplay();
+    }
 
-        if(volhistory.length > width) {
-            volhistory.splice(0,1);
-        }
+    if(FFTBars) {
+        fftLinearDisplay();
+    }
+
+    else if (radialBars) {
+        fftRadialDisplay();
     }
 
 }
@@ -211,6 +212,62 @@ function star(n, x, y, d1, d2) {
         vertex(px, py);
     }
     endShape(CLOSE);
+}
+
+function amplitudeDisplay() {
+    // var vol = amp.getLevel();
+    // volhistory.push(vol * 50);
+    // stroke(255);
+    // strokeWeight(1);
+    // noFill();
+    // beginShape();
+    
+    // for(var i=0; i < volhistory.length; i++) {
+    //     var y = map(volhistory[i], 0, 1, height, 0);
+    //     vertex(i, y - windowHeight/2 + 25);
+    // }
+    // endShape();
+
+    // if(volhistory.length > width) {
+    //     volhistory.splice(0,1);
+    // }
+}
+
+function fftLinearDisplay() {
+    var spectrum = fft.analyze();
+    noStroke();
+
+    for (var i = 0; i < spectrum.length; i++) {
+        var amp2 = spectrum[i];
+        var y = map(amp2, 0, 256, height, 0);
+        fill(i, 255, 255);
+        rect(width / 2 + i * w, y, w - 2, height - y);
+
+        // // RADIAL
+        // var r = map(amp2, 0, 256, 40, 200);
+        // var x = r * cos
+    }
+    // endShape();
+}
+
+function fftRadialDisplay() {
+    var spectrum2 = fft2.analyze();
+    noStroke();
+    noFill();
+
+    translate(width/2, height/2);
+    for(var i=0; i < spectrum2.length; i++) {
+        var amp2 = spectrum2[i];
+        var angle = map(i, 0, spectrum2.length, 0, 360);
+        var r = map(amp2, 0, 256, 20, 100);
+        var x = r * cos(angle);
+        var y = r * sin(angle);
+
+
+        stroke(i, 255, 255);
+        line(0, 0, x, y);
+    }
+    endShape();
 }
 
 // function mousePressed() { getAudioContext().resume(); }

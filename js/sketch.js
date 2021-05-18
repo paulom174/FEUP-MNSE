@@ -30,7 +30,8 @@ var visible = true;
 var gui, gui2;
 
 function preload() {
-    song = loadSound('files/ambient_rock.mp3');
+    // song = loadSound('files/ambient_rock.mp3');
+    song = loadSound('files/hurricane.mp3');
 }
 
 function toggleSong() {

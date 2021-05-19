@@ -86,23 +86,7 @@ function draw() {
     clear();
 
     toggleSong();
-
-
-    if(!invert) {
-        counter++;
-    }
-    else {
-        counter--;
-    }
-
-    if(counter > 500) {
-        invert = true
-    }
-    else if (counter < 0) {
-        invert = false;
-    }
-
-    console.log(counter);
+    handleCounter();
 
     background(backgroundColor);
 
@@ -266,7 +250,7 @@ function fftRadialDisplay() {
     for(var i=0; i < (spectrum2.length-70)/2; i++) {
         var angle = map(i, 0, (spectrum2.length-70)/2, 0, TWO_PI);
         var amp2 = spectrum2[i];
-        var r = map(amp2, 0, 128, 250, 400);
+        var r = map(amp2, 0, 128, 250, 325);
         var x = r * cos(angle);
         var y = r * sin(angle);
     
@@ -282,6 +266,22 @@ function fftRadialDisplay() {
     
         stroke(i, 255, 255);
         line(0, 0, x, y);
+    }
+}
+
+function handleCounter() {
+    if (!invert) {
+        counter++;
+    }
+    else {
+        counter--;
+    }
+
+    if (counter > 500) {
+        invert = true
+    }
+    else if (counter < 0) {
+        invert = false;
     }
 }
 

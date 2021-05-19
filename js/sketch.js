@@ -30,7 +30,10 @@ var visible = true;
 var gui, gui2;
 
 function preload() {
-    song = loadSound('files/ambient_rock.mp3');
+    // song = loadSound('files/ambient_rock.mp3');
+    // song = loadSound('files/hurricane.mp3');
+    // song = loadSound('files/all_frequencies.mp3');
+    song = loadSound('files/israel.mp3');
 }
 
 function toggleSong() {
@@ -69,9 +72,12 @@ function setup() {
     // song.play();
     amp = new p5.Amplitude();
     fft = new p5.FFT(0.9, 64);
-    fft2 = new p5.FFT(0.9, 64);
+    fft2 = new p5.FFT(0.9, 256);
 
     w = width / 64;
+
+    counter = 0;
+    invert = false;
 
     // noLoop();
 }
@@ -80,6 +86,23 @@ function draw() {
     clear();
 
     toggleSong();
+
+
+    if(!invert) {
+        counter++;
+    }
+    else {
+        counter--;
+    }
+
+    if(counter > 500) {
+        invert = true
+    }
+    else if (counter < 0) {
+        invert = false;
+    }
+
+    console.log(counter);
 
     background(backgroundColor);
 
@@ -98,11 +121,15 @@ function draw() {
         noStroke();
     }
 
+    let vol = amp.getLevel() * 1000;
+    let radiusMultiplier = map(vol, 0, 10, 1, 1.2);
+    let angleAdder = map(counter % 500, 0, 500, 0, TWO_PI);
+
     for (var i = 0; i < numShapes; i++) {
 
-        var angle = TWO_PI / numShapes * i;
-        var x = width / 2 + cos(angle) * bigRadius;
-        var y = height / 2 + sin(angle) * bigRadius;
+        var angle = TWO_PI / numShapes * i + angleAdder;
+        var x = width / 2 + cos(angle) * bigRadius * radiusMultiplier;
+        var y = height / 2 + sin(angle) * bigRadius * radiusMultiplier;
         var d = 2 * radius;
 
         // pick a shape
@@ -131,31 +158,6 @@ function draw() {
 
         }
     }
-
-    // user experience?
-    // fill(255, 10);
-    // circle(mouseX, mouseY, 50);
-
-    // // MIC ELLIPSE
-    // if(lips) {
-    //     vol = mic.getLevel();
-    //     ellipse(900,400, 200, vol*800);
-    // }
-
-    // AUDIO 
-    // vol = amp.getLevel();
-    // volhistory.push(vol*50);
-    // stroke(255);
-    // noFill();
-    // beginShape();
-    // for(let i=0; i < volhistory.length; i++) {
-    //     var y = map(volhistory[i], 0, 1, height-100, 0);
-    //     vertex(i, y);
-    // }
-    // endShape();
-
-    // stroke(255, 0, 0);
-    // line(volhistory.length, 0, volhistory.length, height);
 
     if(amplitude) {
         amplitudeDisplay();
@@ -248,22 +250,39 @@ function fftLinearDisplay() {
 
 function fftRadialDisplay() {
     var spectrum2 = fft2.analyze();
-    noStroke();
     noFill();
-    beginShape();
+    noStroke();
     translate(width/2, height/2);
-    for(var i=0; i < spectrum2.length; i++) {
+    // for(var i=0; i < (spectrum2.length - 20); i++) {
+    //     var angle = map(i, 0, spectrum2.length - 20, 0, TWO_PI);
+    //     var amp2 = spectrum2[i];
+    //     var r = map(amp2, 0, 128, 250, 400);
+    //     var x = r * cos(angle);
+    //     var y = r * sin(angle);
+    
+    //     stroke(i, 255, 255);
+    //     line(0, 0, x, y);
+    // }
+    for(var i=0; i < (spectrum2.length-70)/2; i++) {
+        var angle = map(i, 0, (spectrum2.length-70)/2, 0, TWO_PI);
         var amp2 = spectrum2[i];
-        var angle = map(i, 0, spectrum2.length, 0, 360);
-        var r = map(amp2, 0, 256, 40, 200);
+        var r = map(amp2, 0, 128, 250, 400);
         var x = r * cos(angle);
         var y = r * sin(angle);
-
-
+    
         stroke(i, 255, 255);
         line(0, 0, x, y);
     }
-    endShape();
+    for(var i=(spectrum2.length-70)/2; i < (spectrum2.length-70); i++) {
+        var angle = map(i, 0, (spectrum2.length-70)/2, 0, TWO_PI);
+        var amp2 = spectrum2[i];
+        var r = map(amp2, 0, 128, 150, 250);
+        var x = r * cos(angle);
+        var y = r * sin(angle);
+    
+        stroke(i, 255, 255);
+        line(0, 0, x, y);
+    }
 }
 
 // function mousePressed() { getAudioContext().resume(); }

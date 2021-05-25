@@ -1,4 +1,3 @@
-// var mic;
 var song;
 var volhistory = [];
 var amp;
@@ -16,33 +15,40 @@ var drawStroke = true;
 var drawFill = true;
 var radius = 20;
 var shape = ['circle', 'triangle', 'square', 'pentagon', 'star'];
-//var label = 'label';
 
 // gui2 params
-var lips = false;
-var playSong = false;
+var pause = false;
 var amplitude = false;
 var FFTBars = false;
 var radialBars = false;
+var visuals = ['radialBars', 'FFTBars', 'amplitude'];
+var music = ['rock', 'techno', 'hurricane', 'israel'];
 
 // gui
 var visible = true;
 var gui, gui2;
 
+// song manager
+var previous;
+var current;
+
 function preload() {
-    // song = loadSound('files/ambient_rock.mp3');
-    // song = loadSound('files/hurricane.mp3');
-    // song = loadSound('files/all_frequencies.mp3');
-    song = loadSound('files/israel.mp3');
+    song1 = loadSound('files/ambient_rock.mp3');
+    song2 = loadSound('files/techno.mp3');
+    song3 = loadSound('files/hurricane.mp3');
+    song4 = loadSound('files/israel.mp3');
+    img = loadImage('files/logo.png');
+
+    song = song1;
 }
 
 function toggleSong() {
-    if(playSong) {
-        song.play();
-        amplitudeDisplay();
+    if(pause) {
+        song.pause()
     }
-    else {
-        song.pause();
+    else if (!song.isPlaying()) {
+        song.play();
+        // amplitudeDisplay();
     }
 }
 
@@ -61,15 +67,11 @@ function setup() {
         'drawFill', 'fillColor', 'drawStroke', 'strokeColor', 'strokeWidth', 'backgroundColor');
 
     gui2 = createGui('Main display').setPosition(230, 20);
-    gui2.addGlobals('playSong', 'lips', 'amplitude', 'FFTBars', 'radialBars');
+    gui2.addGlobals('music', 'visuals', 'pause');
 
-    // // MIC INPUT
-    // mic = new p5.AudioIn();
-    // mic.start();
-
-    song.setVolume(0.01);
+    song.setVolume(0.1);
     song.playMode('untilDone');
-    // song.play();
+    song.play();
     amp = new p5.Amplitude();
     fft = new p5.FFT(0.9, 64);
     fft2 = new p5.FFT(0.9, 256);
@@ -79,11 +81,16 @@ function setup() {
     counter = 0;
     invert = false;
 
-    // noLoop();
+    previous = music;
 }
   
 function draw() {
     clear();
+    current = music;
+
+    if(current != previous) {
+        switchSong();
+    }
 
     toggleSong();
     handleCounter();
@@ -105,7 +112,7 @@ function draw() {
         noStroke();
     }
 
-    let vol = amp.getLevel() * 1000;
+    let vol = amp.getLevel() * 100;
     let radiusMultiplier = map(vol, 0, 10, 1, 1.2);
     let angleAdder = map(counter % 500, 0, 500, 0, TWO_PI);
 
@@ -143,18 +150,18 @@ function draw() {
         }
     }
 
-    if(amplitude) {
-        amplitudeDisplay();
+    switch(visuals) {
+        case 'amplitude':
+            amplitudeDisplay();
+            break;
+        case 'FFTBars':
+            fftLinearDisplay();
+            break;
+        case 'radialBars':
+            fftRadialDisplay();
+            break;
     }
-
-    else if(FFTBars) {
-        fftLinearDisplay();
-    }
-
-    else if (radialBars) {
-        fftRadialDisplay();
-    }
-
+    image(img, windowWidth - 250, 20);
 }
 
 // check for keyboard events
@@ -202,7 +209,7 @@ function star(n, x, y, d1, d2) {
 
 function amplitudeDisplay() {
     var vol = amp.getLevel();
-    volhistory.push(vol * 50);
+    volhistory.push(vol * 15);
     stroke(255);
     strokeWeight(1);
     noFill();
@@ -210,7 +217,7 @@ function amplitudeDisplay() {
     
     for(var i=0; i < volhistory.length; i++) {
         var y = map(volhistory[i], 0, 1, height, 0);
-        vertex(i, y - windowHeight/2 + 25);
+        vertex(i, y - windowHeight/2 + 250);
     }
     endShape();
 
@@ -237,16 +244,6 @@ function fftRadialDisplay() {
     noFill();
     noStroke();
     translate(width/2, height/2);
-    // for(var i=0; i < (spectrum2.length - 20); i++) {
-    //     var angle = map(i, 0, spectrum2.length - 20, 0, TWO_PI);
-    //     var amp2 = spectrum2[i];
-    //     var r = map(amp2, 0, 128, 250, 400);
-    //     var x = r * cos(angle);
-    //     var y = r * sin(angle);
-    
-    //     stroke(i, 255, 255);
-    //     line(0, 0, x, y);
-    // }
     for(var i=0; i < (spectrum2.length-70)/2; i++) {
         var angle = map(i, 0, (spectrum2.length-70)/2, 0, TWO_PI);
         var amp2 = spectrum2[i];
@@ -267,6 +264,7 @@ function fftRadialDisplay() {
         stroke(i, 255, 255);
         line(0, 0, x, y);
     }
+    translate(-width / 2, -height / 2);
 }
 
 function handleCounter() {
@@ -283,6 +281,26 @@ function handleCounter() {
     else if (counter < 0) {
         invert = false;
     }
+}
+
+function switchSong() {
+    song.pause();
+    switch(current) {
+        case 'rock':
+            song = song1;
+            break;
+        case 'techno':
+            song = song2;
+            break;
+        case 'hurricane':
+            song = song3;
+            break;
+        case 'israel':
+            song = song4;
+            break;
+    }
+    song.setVolume(0.1);
+    previous = music;
 }
 
 // function mousePressed() { getAudioContext().resume(); }
